@@ -10,8 +10,6 @@
 #' @param pro_ctr distribution of clinical categories for the
 #' control group.
 #' @param U the desirability of each outcome level.
-#' @param fixed_ss fixed sample size when simulate the OC for various effect
-#' size.
 #' @param ors a user-defined matrix, each row denotes the various scenarios,
 #' the number of columns depend on the number of outcome scales.
 #' @param n_range the additional sample size for each arm each stage after n_po, n_npo.
@@ -63,21 +61,23 @@
 #' @examples
 #'
 #' \donttest{
+#'
+#'get_oc_Switch(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
+#'              U = c(100,80,65,25,10,0), n_range = 10, fixed_es = c(1.5,1.5,1,1,1),
+#'              n_po = 475,n_npo = 75, ntrial = 5, method = "Frequentist")
+#'
+#'
 #' or2 = matrix(rep(seq(1,1.3, by=0.1), times=1, each=3),ncol = 3,byrow = TRUE)
 #' or1 = matrix(rep(1.5, dim(or2)[1]*2), ncol = 2, byrow = TRUE)
 #' ors = cbind(or1, or2)
-#' get_oc_Switch(alpha = 0.05, pro_ctr =  c(0.58,0.05,0.17,0.03,0.04,0.13),
-#'               U = c(100,80,65,25,10,0), fixed_ss = 400, ors, n_po = 100,
-#'               n_npo = 150,ntrial = 5, method = "Frequentist")
 #'
-#' get_oc_Switch(alpha = 0.05, pro_ctr =  c(0.58,0.05,0.17,0.03,0.04,0.13),
-#'               U = c(100,80,65,25,10,0), n_range = 10,
-#'               fixed_es = c(1.8,1.5,1,1,1),n_po = 100, n_npo = 150,
+#' get_oc_Switch(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
+#'               U = c(100,80,65,25,10,0), ors, n_po = 475, n_npo = 75,
 #'               ntrial = 5, method = "Frequentist")
 #'               }
 
 
-get_oc_Switch = function(alpha, pro_ctr, U, fixed_ss, ors, n_range, fixed_es,
+get_oc_Switch = function(alpha, pro_ctr, U, ors, n_range, fixed_es,
                           n_po, n_npo, ntrial, method){
 
 
@@ -91,22 +91,18 @@ get_oc_Switch = function(alpha, pro_ctr, U, fixed_ss, ors, n_range, fixed_es,
   if (missing(fixed_es))
     fixed_es = NULL
 
-  if (missing(fixed_ss))
-    fixed_ss = NULL
-
   if (is.numeric(n_range) & is.numeric(ors)) {
     stop("n_range and ors can not be specified at the same time.")
   }
 
-  if (is.numeric(fixed_es) & is.numeric(fixed_ss)) {
-    stop("fixed_es and fixed_ss can not be specified at the same time.")
-  }
-
+  #if (is.numeric(fixed_es) & is.numeric(fixed_ss)) {
+  #  stop("fixed_es and fixed_ss can not be specified at the same time.")
+  #}
 
   # grid search
   or = rep(1,length(pro_ctr)-1)
-  cf_grid = seq(0.6, 0.7, by = 0.1)
-  threshold_grid = seq(0.8, 0.9, by = 0.1)
+  cf_grid = seq(0.7, 0.7, by = 0.1)
+  threshold_grid = seq(0.9, 0.9, by = 0.1)
   output = c()
 
   for (cf in cf_grid){
@@ -116,14 +112,14 @@ get_oc_Switch = function(alpha, pro_ctr, U, fixed_ss, ors, n_range, fixed_es,
                                   U, cf, threshold, method = method)
       rr = c(cf, threshold, out)
       output = rbind(output, rr)
-      colnames(output) = c("cf", "threshold", "PET(%)", "alpha", "Avg SS")
+      colnames(output) = c("cf", "threshold", "PET(%)", "alpha", "Avg SS", "PO(%)", "NPO(%)")
       results = as.data.frame(output)
     }
   }
   index = min(which(abs(results$alpha-alpha)==min(abs(results$alpha-alpha))))
-  vec = c(results[index,c(1,2)])
+  vec = c(results[index,c(1,2,4)])
   thrsh = c(vec$cf, vec$threshold)
-  names(thrsh) = c("futility", "superority")
+  names(thrsh) = c("futility", "superiority")
 
 
   output = c()
@@ -138,32 +134,40 @@ get_oc_Switch = function(alpha, pro_ctr, U, fixed_ss, ors, n_range, fixed_es,
     for (i in 1:dim(ngrid)[1]){
       out = multiple_trial_switch(or = fixed_es, sim_runs = ntrial, sd=0.2, pro_ctr,
                                   n_po = ngrid[i,1], n_npo = ngrid[i,2], U,
+                                  #cf =0.6, threshold = 0.9,
                                   cf = vec$cf, threshold = vec$threshold,
                                   method = method)
       output = rbind(output, out)
-      colnames(output) = c("PET(%)", "Power(%)", "Avg SS")
-    }
+      colnames(output) = c("PET(%)", "Power(%)", "Avg SS", "PO(%)", "NPO(%)")
 
-  }else if(is.numeric(fixed_ss)&is.numeric(ors)){
+    }
+    output[,2] = output[,2]*100
+  }else if(is.numeric(ors)){
 
     for (i in 1:dim(ors)[1]){
       or = ors[i,]
 
       p2 = pro_trt_cal(or, pro_ctr)
-      dif_utility = mean_u(U,pro_ctr,p2)[3]
+      dif_utility = round(mean_u(U,pro_ctr,p2)[3],digits = 2)
 
       out = multiple_trial_switch(or, sim_runs = ntrial, sd=0.2, pro_ctr, n_po, n_npo,
                                   U, cf = vec$cf, threshold = vec$threshold,
                                   method = method)
       rr = c(dif_utility, out)
       output = rbind(output, rr)
-      colnames(output) = c("Effect Size",  "PET(%)", "Power(%)", "Avg SS")
+      colnames(output) = c("Effect Size",  "PET(%)", "Power(%)", "Avg SS", "PO(%)", "NPO(%)")
     }
+
+    output[,3] = output[,3]*100
   }
+
+  output = as.data.frame(output)
   rownames(output) = paste0("Scenario ", 1:dim(output)[1])
   results = list()
-  results$design = output
+  results$design = round(output,digits = 2)
   results$threshold = thrsh
+  results$typeIerror = round(vec$alpha,digits = 2)
+  #results$model_selection = c(output$`PO(%)`, output$`NPO(%)`)
   return(results)
 
 }

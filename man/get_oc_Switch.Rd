@@ -9,7 +9,6 @@ get_oc_Switch(
   alpha,
   pro_ctr,
   U,
-  fixed_ss,
   ors,
   n_range,
   fixed_es,
@@ -26,9 +25,6 @@ get_oc_Switch(
 control group.}
 
 \item{U}{the desirability of each outcome level.}
-
-\item{fixed_ss}{fixed sample size when simulate the OC for various effect
-size.}
 
 \item{ors}{a user-defined matrix, each row denotes the various scenarios,
 the number of columns depend on the number of outcome scales.}
@@ -91,16 +87,18 @@ Grid search of sample size is used for guarantee a desirable type I error rate.
 \examples{
 
 \donttest{
+
+get_oc_Switch(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
+             U = c(100,80,65,25,10,0), n_range = 10, fixed_es = c(1.5,1.5,1,1,1),
+             n_po = 475,n_npo = 75, ntrial = 5, method = "Frequentist")
+
+
 or2 = matrix(rep(seq(1,1.3, by=0.1), times=1, each=3),ncol = 3,byrow = TRUE)
 or1 = matrix(rep(1.5, dim(or2)[1]*2), ncol = 2, byrow = TRUE)
 ors = cbind(or1, or2)
-get_oc_Switch(alpha = 0.05, pro_ctr =  c(0.58,0.05,0.17,0.03,0.04,0.13),
-              U = c(100,80,65,25,10,0), fixed_ss = 400, ors, n_po = 100,
-              n_npo = 150,ntrial = 5, method = "Frequentist")
 
-get_oc_Switch(alpha = 0.05, pro_ctr =  c(0.58,0.05,0.17,0.03,0.04,0.13),
-              U = c(100,80,65,25,10,0), n_range = 10,
-              fixed_es = c(1.8,1.5,1,1,1),n_po = 100, n_npo = 150,
+get_oc_Switch(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
+              U = c(100,80,65,25,10,0), ors, n_po = 475, n_npo = 75,
               ntrial = 5, method = "Frequentist")
               }
 }

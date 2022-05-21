@@ -52,11 +52,9 @@
 #'
 #' @examples
 #' set.seed(123)
-#' ss_npo(nmax = 100, or_alt = c(1.8,1.5,1,1,1),
-#'        pro_ctr = c(0.5,0.1,0.05,0.2,0.05,0.1), U = c(100,80,65,25,10,0),
+#' ss_npo(nmax = 200, or_alt = c(1.6,1.5,1.5,1.4,1.4),
+#'        pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13), U = c(100,80,65,25,10,0),
 #'        alpha = 0.05, power = 0.8, ntrial = 5, method = "Frequentist")
-#'
-
 
 #----------------------------------------------------------------------------
 ## sample size calculator
@@ -65,8 +63,9 @@ ss_npo = function(nmax, or_alt, pro_ctr, U,
 
   N = 200
   # under null, calculate thresholds
-  cf_grid        = seq(0.6, 0.7, by=0.05)
-  threshold_grid = seq(0.75, 0.85, by=0.05)
+
+  cf_grid        = 0.2#seq(0.5, 0.7, by=0.1)
+  threshold_grid = seq(0.8, 0.95, by=0.05)
 
   or_null  = rep(1, length(pro_ctr)-1)
   or.mat = matrix(rep(or_null, ntrial), nrow = ntrial,
@@ -85,14 +84,14 @@ ss_npo = function(nmax, or_alt, pro_ctr, U,
     }
   }
   index = min(which(abs(results$alpha-alpha)==min(abs(results$alpha-alpha))))
-  vec = c(results[index,c(1,2)])
+  vec = c(results[index,c(1,2,4)])
   thrsh = c(vec$cf, vec$threshold)
-  names(thrsh) = c("futility", "superority")
+  names(thrsh) = c("futility", "superiority")
 
   # calculate power
   or.mat = matrix(rep(or_alt, ntrial), nrow = ntrial,
                   ncol = length(or_alt), byrow = TRUE)
-  n_grid = seq(50, nmax, by = 50)
+  n_grid = seq(50, nmax, by = 25)
   output = c()
 
   for (n in n_grid){
@@ -100,12 +99,13 @@ ss_npo = function(nmax, or_alt, pro_ctr, U,
                              threshold=vec$threshold, method = method)
     rr = c(n, out)
     output = rbind(output, rr)
-    colnames(output) = c("samplesize", "PET(%)", "Power", "avgss")
+    colnames(output) = c("samplesize", "PET(%)", "Power(%)", "avgss")
   }
   results = list()
-  index = min(which(abs(output[,3]-power)==min(abs(output[,3]-power))))
-  results$sample_size = output[index, 1]
-  results$power = output[index, 3]
+  index = min(which(output[,3] > power))
+  results$total_sample_size_for_each_group = output[index, 1]
+  results$power = output[index, 3]*100
   results$threshold = thrsh
+  results$typeIerror = round(vec$alpha,digits = 3)
   return(results)
 }

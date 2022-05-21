@@ -74,8 +74,8 @@ Grid search of sample size is used for guarantee a desirable type I error rate.
 ors = matrix(c(1.5,1.5,1,1,1,1.5,1.5,1.1,1.1,1.1), nrow=2, ncol=5, byrow=TRUE)
 
 get_oc_NPO(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
-           U = c(100,80,65,25,10,0), fixed_ss = 200, ors,
-           ntrial = 5, method = "Frequentist")
+           U = c(100,80,65,25,10,0), fixed_ss = 200, ors, ntrial = 5,
+           method = "Frequentist")
 
 set.seed(123)
 get_oc_NPO(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),

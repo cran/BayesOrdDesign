@@ -60,8 +60,7 @@ Grid search of sample size is used for guarantee a desirable type I error rate.
 }
 \examples{
 set.seed(123)
-ss_npo(nmax = 100, or_alt = c(1.8,1.5,1,1,1),
-       pro_ctr = c(0.5,0.1,0.05,0.2,0.05,0.1), U = c(100,80,65,25,10,0),
+ss_npo(nmax = 200, or_alt = c(1.6,1.5,1.5,1.4,1.4),
+       pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13), U = c(100,80,65,25,10,0),
        alpha = 0.05, power = 0.8, ntrial = 5, method = "Frequentist")
-
 }

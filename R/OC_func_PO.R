@@ -81,9 +81,8 @@ get_oc_PO = function(alpha, pro_ctr, nmax, fixed_es, ormax, fixed_ss,
   output = c()
 
   # search cutoff points
-  cf_grid        = seq(0.6, 0.7, by=0.05)
-  threshold_grid = seq(0.9, 0.95, by=0.05)
-
+  cf_grid        = 0.2#seq(0.6, 0.7, by=0.1)
+  threshold_grid = seq(0.99, 0.999, by=0.001)
 
   log_or = rnorm(ntrial, log(1), sd = 0.2)
   or = exp(log_or)
@@ -100,11 +99,11 @@ get_oc_PO = function(alpha, pro_ctr, nmax, fixed_es, ormax, fixed_ss,
       results = as.data.frame(output)
     }
     index = min(which(abs(results$alpha-alpha)==min(abs(results$alpha-alpha))))
-    vec = c(results[index,c(1,2)])
+    vec = c(results[index,c(1,2,4)])
   }
 
   thrsh = c(vec$cf, vec$threshold)
-  names(thrsh) = c("futility", "superority")
+  names(thrsh) = c("futility", "superiority")
 
   output = c()
   if (is.numeric(fixed_es) & is.numeric(nmax)){
@@ -118,9 +117,9 @@ get_oc_PO = function(alpha, pro_ctr, nmax, fixed_es, ormax, fixed_ss,
       out = multiple_trial_po(sim_runs = ntrial, or.mat, pro_ctr = pro_ctr, n,
                               cf  = vec$cf, threshold = vec$threshold,
                               method = method)
-      rr = c(n, out)
+      rr = c(2*n, out)
       output = rbind(output, rr)
-      colnames(output) = c("Sample Size", "PET(%)", "Power", "Avg SS")
+      colnames(output) = c("Sample Size", "PET(%)", "Power(%)", "Avg SS")
     }
   }else if (is.numeric(fixed_ss)&is.numeric(ormax)){
 
@@ -137,12 +136,16 @@ get_oc_PO = function(alpha, pro_ctr, nmax, fixed_es, ormax, fixed_ss,
                                method = method)
       rr = c(or, prob)
       output = rbind(output, rr)
-      colnames(output) = c("Effect Size",  "PET(%)", "Power", "Avg SS")
+      colnames(output) = c("Effect Size",  "PET(%)", "Power(%)", "Avg SS")
     }
   }
+
+
+  output[,3] = output[,3]*100
   rownames(output) = paste0("Scenario ", 1:dim(output)[1])
   results = list()
   results$design = output
   results$threshold = thrsh
+  results$typeIerror = round(vec$alpha,digits = 3)
   return(results)
 }

@@ -74,8 +74,8 @@
 #' ors = matrix(c(1.5,1.5,1,1,1,1.5,1.5,1.1,1.1,1.1), nrow=2, ncol=5, byrow=TRUE)
 #'
 #' get_oc_NPO(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
-#'            U = c(100,80,65,25,10,0), fixed_ss = 200, ors,
-#'            ntrial = 5, method = "Frequentist")
+#'            U = c(100,80,65,25,10,0), fixed_ss = 200, ors, ntrial = 5,
+#'            method = "Frequentist")
 #'
 #' set.seed(123)
 #' get_oc_NPO(alpha = 0.05, pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
@@ -114,8 +114,8 @@ get_oc_NPO = function(alpha, pro_ctr, U, fixed_ss, ors, nmax, fixed_es,
                   byrow = TRUE)
 
   # calculate threshold through grid search
-  cf_grid        = seq(0.5, 0.7, by=0.1)
-  threshold_grid = seq(0.75, 0.85, by=0.05)
+  cf_grid        = 0.2#seq(0.5, 0.7, by=0.1)
+  threshold_grid = seq(0.8, 0.95, by=0.05)
 
   output = c()
 
@@ -131,9 +131,9 @@ get_oc_NPO = function(alpha, pro_ctr, U, fixed_ss, ors, nmax, fixed_es,
     }
   }
   index = min(which(abs(results$alpha-alpha)==min(abs(results$alpha-alpha))))
-  vec = c(results[index,c(1,2)])
+  vec = c(results[index,c(1,2,4)])
   thrsh = c(vec$cf, vec$threshold)
-  names(thrsh) = c("futility", "superority")
+  names(thrsh) = c("futility", "superiority")
 
 
   output = c()
@@ -145,13 +145,12 @@ get_oc_NPO = function(alpha, pro_ctr, U, fixed_ss, ors, nmax, fixed_es,
     n_grid = seq(50, nmax, by = 50)
     for (n in n_grid){
 
-
       out = multiple_trial_npo(or.mat, sd = 0.2, pro_ctr, U, n=n, cf=vec$cf,
                                threshold = vec$threshold, method = method)
 
       rr = c(n, out)
       output = rbind(output, rr)
-      colnames(output) = c("Sample Size", "PET(%)", "Power", "Avg SS")
+      colnames(output) = c("Sample Size", "PET(%)", "Power(%)", "Avg SS")
     }
 
   }else if(is.numeric(fixed_ss)&is.numeric(ors)){
@@ -160,11 +159,10 @@ get_oc_NPO = function(alpha, pro_ctr, U, fixed_ss, ors, nmax, fixed_es,
       or = ors[i,]
 
       p2 = pro_trt_cal(or, pro_ctr)
-      dif_utility = mean_u(U,pro_ctr,p2)[3]
+      dif_utility = round(mean_u(U,pro_ctr,p2)[3],digits = 2)
 
       or.mat = matrix(rep(or, ntrial),nrow = ntrial, ncol = length(or),
                       byrow = TRUE)
-
 
       out = multiple_trial_npo(or.mat, sd = 0.2, pro_ctr, U, n = fixed_ss, cf=vec$cf,
                                  threshold = vec$threshold, method = method)
@@ -175,10 +173,13 @@ get_oc_NPO = function(alpha, pro_ctr, U, fixed_ss, ors, nmax, fixed_es,
 
     }
   }
+
+  output[,3] = output[,3]*100
   rownames(output) = paste0("Scenario ", 1:dim(output)[1])
   results = list()
   results$design = output
   results$threshold = thrsh
+  results$typeIerror = round(vec$alpha,digits = 3)
   return(results)
 }
 

@@ -1,7 +1,7 @@
 Package: BayesOrdDesign
 Type: Package
 Title: Bayesian Group Sequential Design for Ordinal Data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Chengxue", "Zhong", role = c("aut", "cre"),
                      email = "chengxue.zhong@uth.tmc.edu"),
              person("Haitao", "Pan", role = "aut"),
@@ -19,14 +19,15 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Imports: ordinal, schoolmath, tidyverse, fda, coda, gsDesign,
-        superdiag, ggplot2, madness, rjmcmc, R2jags, rjags, methods
+        superdiag, ggplot2, madness, rjmcmc, R2jags, rjags, methods,
+        DescTools
 Depends: R (>= 2.10)
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2021-09-20 18:22:27 UTC; czhong
+Packaged: 2022-05-21 12:59:50 UTC; czhong
 Author: Chengxue Zhong [aut, cre],
   Haitao Pan [aut],
   Hongyu Miao [aut]
 Repository: CRAN
-Date/Publication: 2021-09-21 13:40:02 UTC
+Date/Publication: 2022-05-21 23:00:20 UTC

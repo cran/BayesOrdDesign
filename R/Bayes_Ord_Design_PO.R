@@ -50,8 +50,8 @@ ss_po = function(or_alt, pro_ctr, alpha, power, nmax, ntrial,method){
 
   N = 200 # maximum sample size
   # under null, calculate thresholds
-  cf_grid        = seq(0.6, 0.7, by=0.1)
-  threshold_grid = seq(0.85, 0.99, by=0.05)
+  cf_grid        = 0.2#seq(0.6, 0.7, by=0.1)
+  threshold_grid = seq(0.99, 0.999, by=0.001)
 
 
   log_or = rnorm(ntrial, log(1), sd = 0.2)
@@ -73,9 +73,9 @@ ss_po = function(or_alt, pro_ctr, alpha, power, nmax, ntrial,method){
     }
   }
   index = min(which(abs(results$alpha-alpha)==min(abs(results$alpha-alpha))))
-  vec = c(results[index,c(1,2)])
+  vec = c(results[index,c(1,2,4)])
   thrsh = c(vec$cf, vec$threshold)
-  names(thrsh) = c("futility", "superority")
+  names(thrsh) = c("futility", "superiority")
 
   output = c()
 
@@ -84,7 +84,7 @@ ss_po = function(or_alt, pro_ctr, alpha, power, nmax, ntrial,method){
   or.mat = matrix(rep(or, each = length(pro_ctr)-1, times=1),
                   ncol = length(pro_ctr)-1,byrow = TRUE)
 
-  n_grid = seq(50, nmax, by = 50)
+  n_grid = seq(50, nmax, by = 25)
 
   for (n in n_grid){
     out = multiple_trial_po(sim_runs = ntrial, or.mat, pro_ctr = pro_ctr, n,
@@ -92,15 +92,16 @@ ss_po = function(or_alt, pro_ctr, alpha, power, nmax, ntrial,method){
                          method = method)
     rr = c(n, out)
     output = rbind(output, rr)
-    colnames(output) = c("sample size", "PET(%)", "Power", "avgss")
+    colnames(output) = c("sample size", "PET(%)", "Power(%)", "avgss")
 
   }
 
   results = list()
-  index = min(which(abs(output[,3]-power)==min(abs(output[,3]-power))))
-  results$sample_size = output[index, 1]
-  results$power = output[index, 3]
+  index = min(which(output[,3] >= power))
+  results$total_sample_size_for_each_group = output[index, 1]
+  results$power = 100*output[index, 3]
   results$threshold = thrsh
+  results$typeIerror = vec$alpha
   return(results)
 }
 

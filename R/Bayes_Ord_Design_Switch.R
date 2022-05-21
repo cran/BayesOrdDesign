@@ -53,9 +53,9 @@
 #'
 #' @examples
 #' \donttest{
-#' ss_switch(alpha = 0.05, power=0.8, n_po = 110, n_npo = 150, n_range = 10,
-#'          or_alt = c(1.6,1.4,1,1,1), pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
-#'          U = c(100,80,65,25,10,0), ntrial = 5, method = "Frequentist")
+#' ss_switch(alpha = 0.05, power=0.8, n_po = 475, n_npo = 75, n_range = 10,
+#'           or_alt = c(1.5,1.5,1.5,1.5,1.5), pro_ctr = c(0.58,0.05,0.17,0.03,0.04,0.13),
+#'           U = c(100,80,65,25,10,0), ntrial = 5, method = "Frequentist")
 #'          }
 #'
 
@@ -67,8 +67,8 @@ ss_switch = function(alpha, power, n_po, n_npo, or_alt, pro_ctr, U, ntrial,
 
   # under null, calculate thresholds
   or = rep(1,length(pro_ctr)-1)
-  cf_grid        = seq(0.7, 0.7, by=0.05)
-  threshold_grid = seq(0.95, 0.95, by=0.05)
+  cf_grid        = 0.2#seq(0.7, 0.7, by=0.05)
+  threshold_grid = seq(0.99, 0.99, by=0.01)
   output = c()
 
   for (cf in cf_grid){
@@ -79,39 +79,48 @@ ss_switch = function(alpha, power, n_po, n_npo, or_alt, pro_ctr, U, ntrial,
                                   threshold, method = method)
       rr = c(cf, threshold, out)
       output = rbind(output, rr)
-      colnames(output) = c("cf", "threshold", "PET(%)","alpha", "avgss")
+      colnames(output)[1:5] = c("cf", "threshold", "PET(%)","alpha", "Avg SS")
       results = as.data.frame(output)
     }
   }
   index = min(which(abs(results$alpha-alpha)==min(abs(results$alpha-alpha))))
-  vec = c(results[index,c(1,2)])
+  vec = c(results[index,c(1,2,4)])
   thrsh = c(vec$cf, vec$threshold)
-  names(thrsh) = c("futility", "superority")
+  names(thrsh) = c("futility", "superiority")
 
   # calculate power
+  #po = seq(n_po, n_po+n_range, by = 10)
+  #npo = seq(n_npo, n_npo+n_range, by = 10)
+
   po = seq(n_po, n_po+n_range, by = 10)
   npo = seq(n_npo, n_npo+n_range, by = 10)
 
   ngrid = cbind(po, npo)
 
+
   output = c()
+  or_alt = c(1.6,1.5,1.5,1.4,1.4)
   for (i in 1:dim(ngrid)[1]){
 
     out = multiple_trial_switch(or_alt, sim_runs = ntrial, sd = 0.2,
                                 pro_ctr = pro_ctr, n_po = ngrid[i,1], n_npo = ngrid[i,2],
                                 U, cf = vec$cf, threshold = vec$threshold,
                                 method = method)
-    output = as.data.frame(rbind(output, out))
-    colnames(output) = c("PET(%)", "power", "avgss")
 
+    output = as.data.frame(rbind(output, out))
+    colnames(output) = c("PET(%)", "Power(%)", "Avg SS","PO(%)", "NPO(%)")
   }
 
-  results = list()
-  index = min(which(abs(output$power-power)==min(abs(output$power-power))))
-  results$sample_size = output[index,3]
-  results$power = output[index,2]
-  results$threshold = thrsh
 
+  results = list()
+  index = min(which(output[,2] > power))
+  results$total_sample_size_for_each_group = output[index,3]
+  results$power = output[index,2]*100
+  results$threshold = thrsh
+  results$typeIerror = round(vec$alpha, digits = 3)
+  model_sele = output[index,c(4,5)]
+  names(model_sele) = c("PO(%)", "NPO(%)")
+  results$model_selection = model_sele
   return(results)
 
 }

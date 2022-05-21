@@ -1,6 +1,12 @@
 rjmcmc_inter = function(or_alt, sd, pro_ctr, n, U){
 
-  dat = data_gene(or_alt, sd, pro_ctr, n)
+
+  if(all(or_alt == or_alt[1])){
+    dat = data_gene(or_alt, sd, pro_ctr, n)
+  }else{
+    dat = data_gene_npo(or_alt, sd, pro_ctr, n)
+  }
+
 
   L = length(unique(dat$response)) #counts of outcome level
   C = 2*(length(unique(dat$response))-1) # counts of parameters and thresholds
