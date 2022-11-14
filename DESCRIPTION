@@ -1,12 +1,12 @@
 Package: BayesOrdDesign
 Type: Package
 Title: Bayesian Group Sequential Design for Ordinal Data
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(person("Chengxue", "Zhong", role = c("aut", "cre"),
-                     email = "chengxue.zhong@uth.tmc.edu"),
+                     email = "czhong9106@gmail.com"),
              person("Haitao", "Pan", role = "aut"),
              person("Hongyu", "Miao", role = "aut"))
-Maintainer: Chengxue Zhong <chengxue.zhong@uth.tmc.edu>
+Maintainer: Chengxue Zhong <czhong9106@gmail.com>
 Description: The proposed group-sequential trial design is based on Bayesian methods for ordinal endpoints, 
              including three methods, the proportional-odds-model (PO)-based, non-proportional-odds-model (NPO)-based, 
              and PO/NPO switch-model-based designs, which makes our proposed methods generic to be able to deal with 
@@ -17,17 +17,16 @@ Description: The proposed group-sequential trial design is based on Bayesian met
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
-Imports: ordinal, schoolmath, tidyverse, fda, coda, gsDesign,
-        superdiag, ggplot2, madness, rjmcmc, R2jags, rjags, methods,
-        DescTools
-Depends: R (>= 2.10)
+RoxygenNote: 7.2.1
+Imports: ordinal, schoolmath, coda, gsDesign, superdiag, ggplot2,
+        madness, rjmcmc, R2jags, rjags, methods,
+Depends: R (>= 3.3.0)
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2022-05-21 12:59:50 UTC; czhong
+Packaged: 2022-11-12 00:46:55 UTC; alexz
 Author: Chengxue Zhong [aut, cre],
   Haitao Pan [aut],
   Hongyu Miao [aut]
 Repository: CRAN
-Date/Publication: 2022-05-21 23:00:20 UTC
+Date/Publication: 2022-11-14 09:20:14 UTC
